@@ -5,6 +5,8 @@
   margin: 0;
   box-sizing: border-box;
   font-family: Outfit;
+  /* background-color: rgb(30, 35, 39);
+  color: white; */
 }
 #root{
   min-height: 100vh;

@@ -10,7 +10,7 @@ const Main = () => {
   return (
     <div className='main'>
       <div className="nav">
-        <p>Gemini</p>
+        <p>Nexa AI</p>
         <img src={assets.user_icon} alt="" />
       </div>
       <div className="main-container">
@@ -70,7 +70,7 @@ const Main = () => {
             </div>
           </div>
           <p className="bottom-info">
-            Gemini may display inaccurate info, including about people, so double-check its responses. <b>made By Anirban Das.</b>
+            Nexa may display inaccurate info, including about people, so double-check its responses. <b>made By Anirban Das.</b>
           </p>
         </div>
       </div>

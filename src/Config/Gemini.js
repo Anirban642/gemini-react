@@ -6,16 +6,17 @@
 
 import {
     GoogleGenerativeAI,
-    HarmCategory,
-    HarmBlockThreshold,
+    // HarmCategory,
+    // HarmBlockThreshold,
   }  from "@google/generative-ai";
   
   const apiKey = "AIzaSyBgfFh5VvrGuypjtfS2yY_-9VP1DZibdw4";
   const genAI = new GoogleGenerativeAI(apiKey);
   
   const model = genAI.getGenerativeModel({
-    model: "gemini-1.0-pro",
-  });
+    model: "gemini-2.0-flash"
+ });
+
   
   const generationConfig = {
     temperature: 0.9,
@@ -35,7 +36,7 @@ import {
   
     const result = await chatSession.sendMessage(prompt);
     const response=result.response;
-    console.log(response.text());
+    // console.log(response.text());
     return response.text();
   }
   
