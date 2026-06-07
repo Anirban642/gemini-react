@@ -1,43 +1,44 @@
-/*
- * Install the Generative AI SDK
- *
- * $ npm install @google/generative-ai
- */
+const API_KEY = "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";
 
-import {
-    GoogleGenerativeAI,
-    HarmCategory,
-    HarmBlockThreshold,
-  }  from "@google/generative-ai";
-  
-  const apiKey = "AQ.Ab8RN6KU8PUB48P6HOxG8B2qVtz8o_Xq0z9IJrcMWhTjlNyj6Q";
-  const genAI = new GoogleGenerativeAI(apiKey);
-  
-  const model = genAI.getGenerativeModel({
-    model: "gemini-2.5-flash"
- });
+async function run(prompt) {
+try {
+const response = await fetch(
+"https://api.groq.com/openai/v1/chat/completions",
+{
+method: "POST",
+headers: {
+Authorization: `Bearer ${API_KEY}`,
+"Content-Type": "application/json",
+},
+body: JSON.stringify({
+model: "llama-3.3-70b-versatile",
+messages: [
+{
+role: "user",
+content: prompt,
+},
+],
+temperature: 0.7,
+max_tokens: 1024,
+}),
+}
+);
 
-  
-  const generationConfig = {
-    temperature: 0.9,
-    topP: 1,
-    maxOutputTokens: 2048,
-    responseMimeType: "text/plain",
-  };
-  
-  async function run(prompt) {
-    const chatSession = model.startChat({
-      generationConfig,
-   // safetySettings: Adjust safety settings
-   // See https://ai.google.dev/gemini-api/docs/safety-settings
-      history: [
-      ],
-    });
-  
-    const result = await chatSession.sendMessage(prompt);
-    const response=result.response;
-    // console.log(response.text());
-    return response.text();
-  }
-  
-  export default run;
+```
+const data = await response.json();
+
+if (!response.ok) {
+  console.error(data);
+  return "Error: " + (data.error?.message || "Request failed");
+}
+
+return data.choices[0].message.content;
+```
+
+} catch (error) {
+console.error(error);
+return "Something went wrong!";
+}
+}
+
+export default run;
