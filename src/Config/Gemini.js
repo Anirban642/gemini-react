@@ -1,4 +1,4 @@
-const API_KEY = "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";
+const API_KEY = process.env.GROQ_API;
 
 async function run(prompt) {
   try {
