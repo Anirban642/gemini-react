@@ -42,8 +42,9 @@ The browser never receives the Groq key. The `api/chat.js` Vercel function sends
 
 1. Import this repository into Vercel and deploy it.
 2. In the Vercel project settings, add `GROQ_API` with your Groq API key.
-3. Add `ALLOWED_ORIGIN` with the exact GitHub Pages URL, for example `https://yourusername.github.io`.
-4. Redeploy the Vercel project.
+3. Add `ALLOWED_ORIGIN` with the exact frontend URL, for example `https://nexa-react.vercel.app`.
+4. Optionally add `GROQ_MODEL` with a model your Groq account can access. The default is `openai/gpt-oss-20b`.
+5. Redeploy the Vercel project.
 
 For local development, create an ignored `.env` file for the Vercel function:
 

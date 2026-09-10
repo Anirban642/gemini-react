@@ -30,7 +30,7 @@ export default async function handler(request, response) {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          model: "llama-3.3-70b-versatile",
+          model: process.env.GROQ_MODEL || "openai/gpt-oss-20b",
           messages: [{ role: "user", content: prompt.trim() }],
           temperature: 0.7,
           max_tokens: 1024,
