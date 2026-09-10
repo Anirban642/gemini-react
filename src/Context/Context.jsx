@@ -1,4 +1,5 @@
 import { createContext, useState } from "react";
+import PropTypes from "prop-types";
 import run from "../Config/Gemini";
 
 export const Context = createContext();
@@ -24,18 +25,20 @@ const ContextProvider = (props) => {
     }
 
     const onSent = async (prompt) => {
+        const submittedPrompt = (prompt ?? input).trim();
+        if (!submittedPrompt) return;
 
         setResultData("");
         setLoading(true);
         setShowResult(true);
         let response;
         if (prompt !== undefined) {
-            response = await run(prompt);
-            setRecentPrompt(prompt);
+            response = await run(submittedPrompt);
+            setRecentPrompt(submittedPrompt);
         } else {
-            setPrevPrompts(prev=>[...prev,input]);
-            setRecentPrompt(input);
-            response = await run(input);
+            setPrevPrompts(prev=>[...prev,submittedPrompt]);
+            setRecentPrompt(submittedPrompt);
+            response = await run(submittedPrompt);
         }
 
         let responseArray = response.split("**");
@@ -48,7 +51,7 @@ const ContextProvider = (props) => {
             }
         }
 
-        let newResponse2 = newResponse.split("*").join("</br>")
+        let newResponse2 = newResponse.split("*").join("<br />")
         let newResponseArray = newResponse2.split(" ");
         for(let i = 0; i < newResponseArray.length; i++) {
             const nextWord = newResponseArray[i];
@@ -79,5 +82,9 @@ const ContextProvider = (props) => {
         </Context.Provider>
     )
 }
+
+ContextProvider.propTypes = {
+    children: PropTypes.node.isRequired,
+};
 
 export default ContextProvider;
