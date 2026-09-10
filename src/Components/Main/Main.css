@@ -286,6 +286,27 @@
     50% { opacity: 0.45; }
 }
 
+:root[data-theme='dark'] .main .nav,
+:root[data-theme='dark'] .main .card p,
+:root[data-theme='dark'] .message-action,
+:root[data-theme='dark'] .markdown-content blockquote{
+    color: var(--muted-text);
+}
+
+:root[data-theme='dark'] .main .card,
+:root[data-theme='dark'] .search-box,
+:root[data-theme='dark'] .markdown-content code{
+    background-color: var(--panel-bg);
+}
+
+:root[data-theme='dark'] .main .card:hover{
+    background-color: var(--muted-panel);
+}
+
+:root[data-theme='dark'] .markdown-content pre{
+    background: #1f2327;
+}
+
 @media (max-width: 600px) {
   .main-bottom input{
         min-width: 0;

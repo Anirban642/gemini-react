@@ -21,10 +21,16 @@ const ContextProvider = (props) => {
     const [resultData, setResultData] = useState("");
     const [messages, setMessages] = useState([]);
     const [activeConversationId, setActiveConversationId] = useState(null);
+    const [theme, setTheme] = useState(() => localStorage.getItem("nexa-theme") || "light");
 
     useEffect(() => {
         localStorage.setItem("nexa-history", JSON.stringify(prevPrompts));
     }, [prevPrompts]);
+
+    useEffect(() => {
+        document.documentElement.dataset.theme = theme;
+        localStorage.setItem("nexa-theme", theme);
+    }, [theme]);
 
     const newChat = () => {
         setLoading(false);
@@ -67,6 +73,7 @@ const ContextProvider = (props) => {
                 id: conversationId,
                 prompt: existingConversation?.prompt || submittedPrompt,
                 title: existingConversation?.title || submittedPrompt.split(/\s+/).slice(0, 6).join(" "),
+                pinned: existingConversation?.pinned || false,
                 response,
                 messages: completedMessages,
                 createdAt: existingConversation?.createdAt || new Date().toISOString(),
@@ -145,6 +152,16 @@ const ContextProvider = (props) => {
         newChat();
     };
 
+    const togglePin = (conversationId) => {
+        setPrevPrompts((prev) => prev.map((conversation) => conversation.id === conversationId
+            ? { ...conversation, pinned: !conversation.pinned }
+            : conversation));
+    };
+
+    const toggleTheme = () => {
+        setTheme((currentTheme) => currentTheme === "light" ? "dark" : "light");
+    };
+
 
     const contextValue = {
         prevPrompts,
@@ -161,6 +178,9 @@ const ContextProvider = (props) => {
         loadConversation,
         deleteConversation,
         clearHistory,
+        togglePin,
+        theme,
+        toggleTheme,
         input,
         setInput,
         newChat

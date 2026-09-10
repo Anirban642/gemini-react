@@ -1,4 +1,4 @@
-import { useContext, useState } from 'react';
+import { useContext, useMemo, useState } from 'react';
 import './Sidebar.css';
 import {assets} from '../../assets/assets'
 import { Context } from '../../Context/Context';
@@ -7,7 +7,11 @@ const Sidebar = () => {
 
     const [extended,setExtended]=useState(false);
 
-    const {prevPrompts,loadConversation,deleteConversation,clearHistory,newChat} = useContext(Context);
+    const {prevPrompts,loadConversation,deleteConversation,clearHistory,newChat,togglePin,theme,toggleTheme} = useContext(Context);
+    const [searchTerm, setSearchTerm] = useState('');
+    const visiblePrompts = useMemo(() => [...prevPrompts]
+        .sort((first, second) => Number(second.pinned) - Number(first.pinned))
+        .filter((item) => `${item.title || ''} ${item.prompt}`.toLowerCase().includes(searchTerm.toLowerCase())), [prevPrompts, searchTerm]);
 
   return (
     <div className='sidebar'>
@@ -23,11 +27,13 @@ const Sidebar = () => {
                     <p className="recent-title">Recent</p>
                     {prevPrompts.length ? <button onClick={clearHistory} className="clear-history">Clear</button> : null}
                 </div>
-                {prevPrompts?.map((item)=>{
+                <input className="history-search" value={searchTerm} onChange={(event) => setSearchTerm(event.target.value)} placeholder="Search chats" aria-label="Search chats" />
+                {visiblePrompts.map((item)=>{
                     return (
                         <div key={item.id} onClick={()=>loadConversation(item)} className="recent-entry">
                             <img src={assets.message_icon} alt="" />
                             <p>{item.title || item.prompt.slice(0,18)}{!item.title && item.prompt.length > 18 ? ' ...' : ''}</p>
+                            <button className={item.pinned ? 'pin-entry pinned' : 'pin-entry'} onClick={(event) => { event.stopPropagation(); togglePin(item.id); }} aria-label={item.pinned ? 'Unpin conversation' : 'Pin conversation'} title={item.pinned ? 'Unpin' : 'Pin'}>Pin</button>
                             <button
                                 className="delete-entry"
                                 onClick={(event) => {
@@ -57,7 +63,7 @@ const Sidebar = () => {
             </div>
             <div className="bottom-item recent-entry">
                 <img src={assets.setting_icon} alt="" />
-                {extended?<p>Settings</p>:null}
+                <button onClick={toggleTheme} className="theme-toggle">{extended ? (theme === 'light' ? 'Dark mode' : 'Light mode') : ''}</button>
             </div>
         </div>
     </div>

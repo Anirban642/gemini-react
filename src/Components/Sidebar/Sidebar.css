@@ -3,7 +3,7 @@
     display: inline-flex;
     flex-direction: column;
     justify-content: space-between;
-    background-color: #f0f4f9;
+    background-color: var(--panel-bg);
     padding: 25px 15px;
 }
 
@@ -23,10 +23,10 @@
     align-items: center;
     gap: 10px;
     padding: 10px 15px;
-    background-color: #e6eaf1;
+    background-color: var(--muted-panel);
     border-radius: 50px;
     font-size: 14px;
-    color: grey;
+    color: var(--muted-text);
     cursor: pointer;
 }
 
@@ -55,12 +55,12 @@
     padding: 10px;
     padding-right: 40px;
     border-radius: 50px;
-    color: #282828;
+    color: var(--text);
     cursor: pointer;
 }
 
 .sidebar .recent-entry:hover{
-    background-color: #e2e6eb;
+    background-color: var(--muted-panel);
 }
 
 .sidebar .recent-entry p{
@@ -72,7 +72,9 @@
 }
 
 .sidebar .delete-entry,
-.sidebar .clear-history{
+.sidebar .clear-history,
+.sidebar .pin-entry,
+.sidebar .theme-toggle{
     border: 0;
     background: transparent;
     color: #777;
@@ -111,4 +113,35 @@
   .sidebar{
     display: none;
   }
+}
+
+.history-search{
+    width: 100%;
+    margin: 0 0 8px;
+    padding: 8px 10px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--page-bg);
+    color: var(--text);
+}
+
+.sidebar .pin-entry{
+    opacity: 0;
+    font-size: 11px;
+}
+
+.sidebar .recent-entry:hover .pin-entry,
+.sidebar .recent-entry:focus-within .pin-entry,
+.sidebar .pin-entry.pinned{
+    opacity: 1;
+}
+
+.sidebar .pin-entry.pinned{
+    color: #d28b24;
+}
+
+.sidebar .theme-toggle{
+    padding: 0;
+    font: inherit;
+    text-align: left;
 }
