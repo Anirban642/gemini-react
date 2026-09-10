@@ -19,6 +19,7 @@ const Main = () => {
   const [copied, setCopied] = useState(false);
   const recognitionRef = useRef(null);
   const fileInputRef = useRef(null);
+  const promptInputRef = useRef(null);
 
   useEffect(() => () => recognitionRef.current?.stop(), []);
 
@@ -48,6 +49,10 @@ const Main = () => {
     window.setTimeout(() => setCopied(false), 1400);
   };
 
+  const startUsingNexa = () => {
+    promptInputRef.current?.focus();
+  };
+
   return <main className="main">
     <header className="topbar">
       <div><span className="eyebrow">PERSONAL WORKSPACE</span><h1>Nexa <span>AI</span></h1></div>
@@ -63,6 +68,7 @@ const Main = () => {
         <div className="welcome-kicker"><Sparkles size={16} /> Your thinking partner</div>
         <h2>Make space for<br /><em>better thinking.</em></h2>
         <p>Turn questions, files, and half-formed ideas into clear next steps with a workspace that stays out of your way.</p>
+        <button className="primary-cta" onClick={startUsingNexa}><Sparkles size={17} /> Try Nexa for free <Send size={15} /></button>
         <div className="suggestion-grid">{suggestions.map(([title, description]) => <button className="suggestion-card" key={title} onClick={() => onSent(title)}><strong>{title}</strong><span>{description}</span><Send size={16} /></button>)}</div>
         <div className="welcome-stats"><span><b>01</b> Ask anything</span><span><b>02</b> Add context</span><span><b>03</b> Build forward</span></div>
       </section> : <section className="conversation-canvas">
@@ -77,7 +83,7 @@ const Main = () => {
       <div className="composer">
         <input ref={fileInputRef} className="file-input" type="file" accept=".txt,.md,.csv,.json,.pdf" onChange={(event) => addAttachment(event.target.files[0])} />
         <button className="composer-icon" onClick={() => fileInputRef.current?.click()} title="Attach a document"><FileUp size={19} /></button>
-        <input className="prompt-input" onChange={(event) => setInput(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter" && !event.shiftKey && input.trim()) { event.preventDefault(); onSent(); } }} value={input} type="text" placeholder="Ask Nexa anything..." aria-label="Prompt" />
+        <input ref={promptInputRef} className="prompt-input" onChange={(event) => setInput(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter" && !event.shiftKey && input.trim()) { event.preventDefault(); onSent(); } }} value={input} type="text" placeholder="Ask Nexa anything..." aria-label="Prompt" />
         <button className={isListening ? "composer-icon listening" : "composer-icon"} onClick={toggleVoiceTyping} title="Voice typing" aria-label="Voice typing"><Mic size={19} /></button>
         {loading ? <button className="send-button stop" onClick={stopGeneration} title="Stop generating"><Square size={16} fill="currentColor" /></button> : <button className="send-button" onClick={() => onSent()} disabled={!input.trim()} title="Send prompt"><Send size={17} /></button>}
       </div>

@@ -1,6 +1,8 @@
 .sidebar {
   width: 76px;
-  min-height: 100vh;
+  height: 100vh;
+  min-height: 0;
+  overflow: hidden;
   padding: 22px 12px;
   display: flex;
   flex-direction: column;
@@ -12,6 +14,7 @@
   z-index: 5;
 }
 .sidebar.expanded { width: 276px; }
+.sidebar.expanded > div:first-child { min-height: 0; display: flex; flex: 1; flex-direction: column; }
 .brand-row, .profile-chip, .footer-action, .conversation-entry, .new-chat, .history-search { display: flex; align-items: center; }
 .brand-row { min-height: 38px; gap: 10px; }
 .brand-mark { width: 34px; height: 34px; display: grid; place-items: center; border-radius: 10px; color: white; background: linear-gradient(135deg, #078f87, #36b89c); font-weight: 800; }
@@ -27,7 +30,7 @@
 .history-search input { width: 100%; border: 0; outline: 0; background: transparent; color: var(--text); font: inherit; font-size: 12px; }
 .sidebar-section-heading { display: flex; justify-content: space-between; margin: 24px 4px 9px; color: var(--muted-text); font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
 .sidebar-section-heading button { border: 0; background: none; color: var(--accent); cursor: pointer; font-size: 11px; }
-.conversation-list { display: grid; gap: 3px; max-height: 52vh; overflow-y: auto; }
+.conversation-list { display: grid; min-height: 0; flex: 1; gap: 3px; overflow-y: auto; scrollbar-width: thin; }
 .conversation-entry { min-width: 0; gap: 9px; padding: 9px 7px; border-radius: 8px; color: var(--muted-text); cursor: pointer; font-size: 13px; }
 .conversation-entry:hover { background: var(--hover-bg); color: var(--text); }
 .conversation-entry > span { min-width: 0; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

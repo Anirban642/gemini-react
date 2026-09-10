@@ -16,6 +16,8 @@
 .welcome-screen h2 { margin: 22px 0 14px; font-size: clamp(40px, 6vw, 66px); line-height: .98; letter-spacing: -.065em; }
 .welcome-screen h2 em { color: var(--accent); font-style: normal; }
 .welcome-screen > p { max-width: 490px; color: var(--muted-text); font-size: 15px; line-height: 1.7; }
+.primary-cta { display: inline-flex; align-items: center; gap: 9px; margin-top: 25px; padding: 12px 16px; border: 0; border-radius: 8px; color: white; background: var(--accent); cursor: pointer; font: inherit; font-size: 13px; font-weight: 700; box-shadow: 0 8px 18px rgba(7, 143, 135, .2); }
+.primary-cta:hover { background: var(--accent-dark); transform: translateY(-1px); }
 .suggestion-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 40px; }
 .suggestion-card { min-height: 138px; position: relative; padding: 16px; border: 1px solid var(--border); border-radius: 11px; background: var(--card-bg); color: var(--text); cursor: pointer; text-align: left; transition: transform .18s ease, border-color .18s ease, background .18s ease; }
 .suggestion-card:hover { transform: translateY(-3px); border-color: var(--accent); background: var(--accent-soft); }
