@@ -1,50 +1,40 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap');
 
-:root{
-  color: #282828;
-  background: #ffffff;
-  --page-bg: #ffffff;
-  --panel-bg: #f0f4f9;
-  --muted-panel: #e6eaf1;
-  --text: #282828;
-  --muted-text: #585858;
-  --border: #dfe4ea;
-}
-
-:root[data-theme='dark']{
-  color: #f0f4f9;
-  background: #17191c;
-  --page-bg: #17191c;
-  --panel-bg: #24282d;
-  --muted-panel: #30353b;
-  --text: #f0f4f9;
-  --muted-text: #b6bec8;
-  --border: #424951;
-}
-
-*{
-  padding: 0;
-  margin: 0;
-  box-sizing: border-box;
-  font-family: Outfit;
-  /* background-color: rgb(30, 35, 39);
-  color: white; */
-}
-body{
-  background: var(--page-bg);
+:root {
+  --page-bg: #f8faf9;
+  --sidebar-bg: #f1f5f4;
+  --card-bg: #ffffff;
+  --input-bg: #ffffff;
+  --code-bg: #eef3f2;
+  --hover-bg: #e4eeeb;
+  --text: #17272b;
+  --muted-text: #718084;
+  --border: #dce6e4;
+  --accent: #078f87;
+  --accent-dark: #05766f;
+  --accent-soft: #e1f4ef;
+  font-family: 'DM Sans', sans-serif;
   color: var(--text);
-}
-#root{
-  min-height: 100vh;
-  display: flex;
-  animation: fadeIn 1.5s;
+  background: var(--page-bg);
 }
 
-@keyframes fadeIn {
-  0% {
-    opacity: 0;
-  } 
-  100% {
-    opacity: 1;
-  } 
+:root[data-theme='dark'] {
+  --page-bg: #11191c;
+  --sidebar-bg: #172225;
+  --card-bg: #1b292d;
+  --input-bg: #1b292d;
+  --code-bg: #132124;
+  --hover-bg: #26383c;
+  --text: #eff8f5;
+  --muted-text: #91a7aa;
+  --border: #2b4144;
+  --accent: #42c4a9;
+  --accent-dark: #63d8bd;
+  --accent-soft: #193d3b;
 }
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { min-width: 320px; min-height: 100vh; background: var(--page-bg); color: var(--text); }
+button, input, select { font-family: inherit; }
+button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+#root { min-height: 100vh; display: flex; }

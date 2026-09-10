@@ -1,6 +1,7 @@
 import { createContext, useEffect, useRef, useState } from "react";
 import PropTypes from "prop-types";
 import run from "../Config/Gemini";
+import { readAttachment } from "../utils/attachments";
 
 export const Context = createContext();
 
@@ -131,19 +132,17 @@ const ContextProvider = (props) => {
 
     const addAttachment = async (file) => {
         if (!file) return;
-        const supportedTypes = [".txt", ".md", ".csv", ".json"];
-        const extension = `.${file.name.split(".").pop().toLowerCase()}`;
-        if (!supportedTypes.includes(extension)) {
-            setError("Supported files: .txt, .md, .csv, and .json");
-            return;
+        try {
+            const content = await readAttachment(file);
+            if (content.length > 100000) {
+                setError("This file is too large. Please keep files under 100 KB.");
+                return;
+            }
+            setError("");
+            setAttachment({ name: file.name, content });
+        } catch (attachmentError) {
+            setError(attachmentError.message || "This file could not be read");
         }
-        const content = await file.text();
-        if (content.length > 100000) {
-            setError("This file is too large. Please keep files under 100 KB.");
-            return;
-        }
-        setError("");
-        setAttachment({ name: file.name, content });
     }
 
     const clearAttachment = () => setAttachment(null);
