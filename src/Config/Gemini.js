@@ -1,8 +1,9 @@
-async function run(messages, onChunk, model, mode, instructions) {
+async function run(messages, onChunk, model, mode, instructions, signal) {
   try {
     const apiUrl = import.meta.env.VITE_API_URL || "/api/chat";
     const response = await fetch(apiUrl, {
       method: "POST",
+      signal,
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ messages, model, mode, instructions }),
     });
@@ -43,8 +44,9 @@ async function run(messages, onChunk, model, mode, instructions) {
 
     return content || "No response was returned";
   } catch (error) {
+    if (error.name === "AbortError") throw error;
     console.error(error);
-    return `Error: ${error.message || "Something went wrong"}`;
+    throw new Error(error.message || "Something went wrong");
   }
 }
 

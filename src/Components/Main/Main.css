@@ -356,3 +356,45 @@
     background: var(--page-bg);
     color: var(--text);
 }
+
+.file-input{
+    display: none;
+}
+
+.attach-button,
+.stop-button{
+    border: 0;
+    background: transparent;
+    color: var(--muted-text);
+    cursor: pointer;
+    font-size: 13px;
+}
+
+.stop-button{
+    color: #d64545;
+}
+
+.attachment-preview{
+    margin-top: 6px;
+    padding: 5px 12px;
+    color: var(--muted-text);
+    font-size: 12px;
+}
+
+.error-banner{
+    margin: 12px 20px;
+    padding: 10px 14px;
+    border: 1px solid #e5a4a4;
+    border-radius: 8px;
+    background: #fff1f1;
+    color: #9d2929;
+}
+
+.attachment-preview button{
+    margin-left: 8px;
+    border: 0;
+    background: transparent;
+    color: #d64545;
+    cursor: pointer;
+    font-size: 12px;
+}

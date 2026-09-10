@@ -1,4 +1,4 @@
-import { createContext, useEffect, useState } from "react";
+import { createContext, useEffect, useRef, useState } from "react";
 import PropTypes from "prop-types";
 import run from "../Config/Gemini";
 
@@ -25,6 +25,9 @@ const ContextProvider = (props) => {
     const [model, setModel] = useState(() => localStorage.getItem("nexa-model") || "openai/gpt-oss-20b");
     const [mode, setMode] = useState(() => localStorage.getItem("nexa-mode") || "balanced");
     const [customInstructions, setCustomInstructions] = useState(() => localStorage.getItem("nexa-instructions") || "");
+    const [attachment, setAttachment] = useState(null);
+    const [error, setError] = useState("");
+    const abortControllerRef = useRef(null);
 
     useEffect(() => {
         localStorage.setItem("nexa-history", JSON.stringify(prevPrompts));
@@ -45,33 +48,49 @@ const ContextProvider = (props) => {
     }, [mode, customInstructions]);
 
     const newChat = () => {
+        abortControllerRef.current?.abort();
         setLoading(false);
         setShowResult(false);
         setRecentPrompt("");
         setResultData("");
         setMessages([]);
         setActiveConversationId(null);
+        setAttachment(null);
+        setError("");
     }
 
     const onSent = async (prompt) => {
         const submittedPrompt = (prompt ?? input).trim();
         if (!submittedPrompt) return;
 
+        const messageContent = attachment
+            ? `${submittedPrompt}\n\nAttached file: ${attachment.name}\n\n${attachment.content}`
+            : submittedPrompt;
         setResultData("");
+        setError("");
         setLoading(true);
+        abortControllerRef.current = new AbortController();
         setShowResult(true);
         const conversationId = activeConversationId || crypto.randomUUID();
         const nextMessages = [
             ...messages,
-            { role: "user", content: submittedPrompt },
+            { role: "user", content: messageContent },
         ];
 
         setActiveConversationId(conversationId);
         setMessages(nextMessages);
         setRecentPrompt(submittedPrompt);
-        const response = await run(nextMessages, (chunk) => {
-            setResultData((currentResult) => currentResult + chunk);
-        }, model, mode, customInstructions);
+        let response;
+        try {
+            response = await run(nextMessages, (chunk) => {
+                setResultData((currentResult) => currentResult + chunk);
+            }, model, mode, customInstructions, abortControllerRef.current.signal);
+        } catch (requestError) {
+            if (requestError.name !== "AbortError") setError(requestError.message || "The request failed");
+            setLoading(false);
+            abortControllerRef.current = null;
+            return;
+        }
 
         setResultData(response);
         const completedMessages = [
@@ -100,7 +119,34 @@ const ContextProvider = (props) => {
         });
         setLoading(false);
         setInput("");
+        setAttachment(null);
+        abortControllerRef.current = null;
     }
+
+    const stopGeneration = () => {
+        abortControllerRef.current?.abort();
+        setLoading(false);
+        abortControllerRef.current = null;
+    };
+
+    const addAttachment = async (file) => {
+        if (!file) return;
+        const supportedTypes = [".txt", ".md", ".csv", ".json"];
+        const extension = `.${file.name.split(".").pop().toLowerCase()}`;
+        if (!supportedTypes.includes(extension)) {
+            setError("Supported files: .txt, .md, .csv, and .json");
+            return;
+        }
+        const content = await file.text();
+        if (content.length > 100000) {
+            setError("This file is too large. Please keep files under 100 KB.");
+            return;
+        }
+        setError("");
+        setAttachment({ name: file.name, content });
+    }
+
+    const clearAttachment = () => setAttachment(null);
 
     const regenerateResponse = async () => {
         const lastAssistantIndex = [...messages].reverse().findIndex((item) => item.role === "assistant");
@@ -227,6 +273,11 @@ const ContextProvider = (props) => {
         customInstructions,
         setCustomInstructions,
         copyResponse,
+        attachment,
+        addAttachment,
+        clearAttachment,
+        stopGeneration,
+        error,
         input,
         setInput,
         newChat

@@ -9,9 +9,10 @@ import { Context } from '../../Context/Context';
 
 const Main = () => {
 
-  const {onSent,showResult,loading,resultData,setInput,input,messages,regenerateResponse,editLatestPrompt,model,setModel,exportConversation,mode,setMode,customInstructions,setCustomInstructions,copyResponse}=useContext(Context)
+  const {onSent,showResult,loading,resultData,setInput,input,messages,regenerateResponse,editLatestPrompt,model,setModel,exportConversation,mode,setMode,customInstructions,setCustomInstructions,copyResponse,attachment,addAttachment,clearAttachment,stopGeneration,error}=useContext(Context)
   const [isListening, setIsListening] = useState(false);
   const recognitionRef = useRef(null);
+  const fileInputRef = useRef(null);
   const suggestions = [
     ['Suggest some place for an upcoming trip of 4 members', assets.compass_icon],
     ['Help me to pass my examination with a 80% marks', assets.bulb_icon],
@@ -75,6 +76,7 @@ const Main = () => {
         <img src={assets.user_icon} alt="" />
       </div>
       <div className="main-container">
+          {error ? <div className="error-banner" role="alert">{error}</div> : null}
 
           {!showResult
             ?<>
@@ -149,6 +151,8 @@ const Main = () => {
               aria-label="Prompt"
             />
             <div>
+              <button className="attach-button" onClick={() => fileInputRef.current?.click()} title="Attach text file">Attach</button>
+              <input ref={fileInputRef} className="file-input" type="file" accept=".txt,.md,.csv,.json" onChange={(event) => addAttachment(event.target.files[0])} />
               <img
                 className={isListening ? 'voice-button listening' : 'voice-button'}
                 onClick={toggleVoiceTyping}
@@ -156,9 +160,10 @@ const Main = () => {
                 alt={isListening ? 'Stop voice typing' : 'Start voice typing'}
                 title={isListening ? 'Stop voice typing' : 'Start voice typing'}
               />
-              {input.trim() ? <img onClick={()=>onSent()} src={assets.send_icon} alt="Send prompt" /> : null}
+              {loading ? <button className="stop-button" onClick={stopGeneration}>Stop</button> : input.trim() ? <img onClick={()=>onSent()} src={assets.send_icon} alt="Send prompt" /> : null}
             </div>
           </div>
+          {attachment ? <div className="attachment-preview">Attached: {attachment.name}<button onClick={clearAttachment} aria-label="Remove attachment">Remove</button></div> : null}
           <p className="bottom-info">
             Nexa may display inaccurate info, including about people, so double-check its responses. <b>made By Anirban Das.</b>
           </p>
