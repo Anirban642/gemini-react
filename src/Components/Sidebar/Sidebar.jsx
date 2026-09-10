@@ -27,7 +27,7 @@ const Sidebar = () => {
                     return (
                         <div key={item.id} onClick={()=>loadConversation(item)} className="recent-entry">
                             <img src={assets.message_icon} alt="" />
-                            <p>{item.prompt.slice(0,18)}{item.prompt.length > 18 ? ' ...' : ''}</p>
+                            <p>{item.title || item.prompt.slice(0,18)}{!item.title && item.prompt.length > 18 ? ' ...' : ''}</p>
                             <button
                                 className="delete-entry"
                                 onClick={(event) => {

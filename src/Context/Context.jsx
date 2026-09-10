@@ -66,6 +66,7 @@ const ContextProvider = (props) => {
             const conversation = {
                 id: conversationId,
                 prompt: existingConversation?.prompt || submittedPrompt,
+                title: existingConversation?.title || submittedPrompt.split(/\s+/).slice(0, 6).join(" "),
                 response,
                 messages: completedMessages,
                 createdAt: existingConversation?.createdAt || new Date().toISOString(),
@@ -79,6 +80,43 @@ const ContextProvider = (props) => {
         setLoading(false);
         setInput("");
     }
+
+    const regenerateResponse = async () => {
+        const lastAssistantIndex = [...messages].reverse().findIndex((item) => item.role === "assistant");
+        if (lastAssistantIndex === -1 || loading) return;
+
+        const assistantIndex = messages.length - 1 - lastAssistantIndex;
+        const requestMessages = messages.slice(0, assistantIndex);
+        const lastUserMessage = requestMessages[requestMessages.length - 1];
+        if (!lastUserMessage) return;
+
+        setLoading(true);
+        setResultData("");
+        const response = await run(requestMessages, (chunk) => {
+            setResultData((currentResult) => currentResult + chunk);
+        });
+        const completedMessages = [
+            ...requestMessages,
+            { role: "assistant", content: response },
+        ];
+        setMessages(completedMessages);
+        setPrevPrompts((prev) => prev.map((conversation) => conversation.id === activeConversationId
+            ? { ...conversation, response, messages: completedMessages, updatedAt: new Date().toISOString() }
+            : conversation));
+        setLoading(false);
+    };
+
+    const editLatestPrompt = () => {
+        if (loading) return;
+        const lastUserIndex = [...messages].reverse().findIndex((item) => item.role === "user");
+        if (lastUserIndex === -1) return;
+
+        const userIndex = messages.length - 1 - lastUserIndex;
+        setInput(messages[userIndex].content);
+        setMessages(messages.slice(0, userIndex));
+        setResultData("");
+        setShowResult(false);
+    };
 
     const loadConversation = (conversation) => {
         const conversationMessages = conversation.messages || [
@@ -118,6 +156,8 @@ const ContextProvider = (props) => {
         loading,
         resultData,
         messages,
+        regenerateResponse,
+        editLatestPrompt,
         loadConversation,
         deleteConversation,
         clearHistory,

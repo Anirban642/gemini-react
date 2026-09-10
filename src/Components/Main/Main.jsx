@@ -9,7 +9,7 @@ import { Context } from '../../Context/Context';
 
 const Main = () => {
 
-  const {onSent,showResult,loading,resultData,setInput,input,messages}=useContext(Context)
+  const {onSent,showResult,loading,resultData,setInput,input,messages,regenerateResponse,editLatestPrompt}=useContext(Context)
   const [isListening, setIsListening] = useState(false);
   const recognitionRef = useRef(null);
   const suggestions = [
@@ -24,6 +24,8 @@ const Main = () => {
   const visibleMessages = loading
     ? [...messages, { role: 'assistant', content: resultData }]
     : messages;
+  const lastUserIndex = visibleMessages.reduce((lastIndex, message, index) => message.role === 'user' ? index : lastIndex, -1);
+  const lastAssistantIndex = visibleMessages.reduce((lastIndex, message, index) => message.role === 'assistant' ? index : lastIndex, -1);
 
   const toggleVoiceTyping = () => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -89,6 +91,7 @@ const Main = () => {
                   ? <div className="result-title" key={`${message.role}-${index}`}>
                       <img src={assets.user_icon} alt="User" />
                       <p>{message.content}</p>
+                      {index === lastUserIndex && !loading ? <button className="message-action" onClick={editLatestPrompt} title="Edit prompt">Edit</button> : null}
                     </div>
                   : <div className="result-data" key={`${message.role}-${index}`}>
                       <img src={assets.gemini_icon} alt="Nexa AI" />
@@ -102,7 +105,8 @@ const Main = () => {
                             <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeHighlight]}>
                               {message.content}
                             </ReactMarkdown>
-                          </div>}
+                            </div>}
+                          {index === lastAssistantIndex && !loading ? <button className="message-action" onClick={regenerateResponse} title="Generate another response">Regenerate</button> : null}
                     </div>)}
             </div>
           }

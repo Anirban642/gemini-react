@@ -146,6 +146,23 @@
     gap: 20px;
 }
 
+.result-title p{
+    flex: 1;
+}
+
+.message-action{
+    flex: 0 0 auto;
+    border: 0;
+    background: transparent;
+    color: #585858;
+    cursor: pointer;
+    font-size: 13px;
+}
+
+.message-action:hover{
+    color: #4b90ff;
+}
+
 .result img{
     width: 40px;
     border-radius: 50%;
@@ -155,6 +172,10 @@
     display: flex;
     align-items: start;
     gap: 20px;
+}
+
+.result-data .message-action{
+    margin-left: auto;
 }
 
 .loader{
