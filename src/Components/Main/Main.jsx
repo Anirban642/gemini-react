@@ -9,7 +9,7 @@ import { Context } from '../../Context/Context';
 
 const Main = () => {
 
-  const {onSent,showResult,loading,resultData,setInput,input,messages,regenerateResponse,editLatestPrompt}=useContext(Context)
+  const {onSent,showResult,loading,resultData,setInput,input,messages,regenerateResponse,editLatestPrompt,model,setModel,exportConversation}=useContext(Context)
   const [isListening, setIsListening] = useState(false);
   const recognitionRef = useRef(null);
   const suggestions = [
@@ -58,6 +58,13 @@ const Main = () => {
     <div className='main'>
       <div className="nav">
         <p>Nexa AI</p>
+        <div className="nav-tools">
+          <select value={model} onChange={(event) => setModel(event.target.value)} aria-label="AI model">
+            <option value="openai/gpt-oss-20b">GPT OSS 20B</option>
+            <option value="openai/gpt-oss-120b">GPT OSS 120B</option>
+          </select>
+          {showResult ? <button onClick={() => exportConversation('md')} title="Export Markdown">Export</button> : null}
+        </div>
         <img src={assets.user_icon} alt="" />
       </div>
       <div className="main-container">

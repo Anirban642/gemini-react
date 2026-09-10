@@ -22,6 +22,7 @@ const ContextProvider = (props) => {
     const [messages, setMessages] = useState([]);
     const [activeConversationId, setActiveConversationId] = useState(null);
     const [theme, setTheme] = useState(() => localStorage.getItem("nexa-theme") || "light");
+    const [model, setModel] = useState(() => localStorage.getItem("nexa-model") || "openai/gpt-oss-20b");
 
     useEffect(() => {
         localStorage.setItem("nexa-history", JSON.stringify(prevPrompts));
@@ -31,6 +32,10 @@ const ContextProvider = (props) => {
         document.documentElement.dataset.theme = theme;
         localStorage.setItem("nexa-theme", theme);
     }, [theme]);
+
+    useEffect(() => {
+        localStorage.setItem("nexa-model", model);
+    }, [model]);
 
     const newChat = () => {
         setLoading(false);
@@ -59,7 +64,7 @@ const ContextProvider = (props) => {
         setRecentPrompt(submittedPrompt);
         const response = await run(nextMessages, (chunk) => {
             setResultData((currentResult) => currentResult + chunk);
-        });
+        }, model);
 
         setResultData(response);
         const completedMessages = [
@@ -74,6 +79,8 @@ const ContextProvider = (props) => {
                 prompt: existingConversation?.prompt || submittedPrompt,
                 title: existingConversation?.title || submittedPrompt.split(/\s+/).slice(0, 6).join(" "),
                 pinned: existingConversation?.pinned || false,
+                tag: existingConversation?.tag || "General",
+                model,
                 response,
                 messages: completedMessages,
                 createdAt: existingConversation?.createdAt || new Date().toISOString(),
@@ -101,7 +108,7 @@ const ContextProvider = (props) => {
         setResultData("");
         const response = await run(requestMessages, (chunk) => {
             setResultData((currentResult) => currentResult + chunk);
-        });
+        }, model);
         const completedMessages = [
             ...requestMessages,
             { role: "assistant", content: response },
@@ -162,6 +169,25 @@ const ContextProvider = (props) => {
         setTheme((currentTheme) => currentTheme === "light" ? "dark" : "light");
     };
 
+    const updateConversationTag = (conversationId, tag) => {
+        setPrevPrompts((prev) => prev.map((conversation) => conversation.id === conversationId
+            ? { ...conversation, tag }
+            : conversation));
+    };
+
+    const exportConversation = (format) => {
+        if (!messages.length) return;
+        const conversation = messages.map((message) => `${message.role === "user" ? "## You" : "## Nexa AI"}\n\n${message.content}`).join("\n\n");
+        const content = format === "json" ? JSON.stringify(messages, null, 2) : `# Nexa AI conversation\n\n${conversation}`;
+        const blob = new Blob([content], { type: format === "json" ? "application/json" : "text/markdown" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `nexa-conversation.${format === "json" ? "json" : "md"}`;
+        link.click();
+        URL.revokeObjectURL(url);
+    };
+
 
     const contextValue = {
         prevPrompts,
@@ -181,6 +207,10 @@ const ContextProvider = (props) => {
         togglePin,
         theme,
         toggleTheme,
+        updateConversationTag,
+        exportConversation,
+        model,
+        setModel,
         input,
         setInput,
         newChat

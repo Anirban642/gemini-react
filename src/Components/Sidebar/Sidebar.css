@@ -145,3 +145,11 @@
     font: inherit;
     text-align: left;
 }
+
+.sidebar .tag-select{
+    max-width: 72px;
+    border: 0;
+    background: transparent;
+    color: var(--muted-text);
+    font-size: 11px;
+}

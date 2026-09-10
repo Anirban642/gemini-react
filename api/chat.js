@@ -34,6 +34,11 @@ export default async function handler(request, response) {
     return response.status(500).json({ error: "The server API key is not configured" });
   }
 
+  const supportedModels = ["openai/gpt-oss-20b", "openai/gpt-oss-120b"];
+  const model = supportedModels.includes(request.body?.model)
+    ? request.body.model
+    : process.env.GROQ_MODEL || "openai/gpt-oss-20b";
+
   try {
     const groqResponse = await fetch(
       "https://api.groq.com/openai/v1/chat/completions",
@@ -44,7 +49,7 @@ export default async function handler(request, response) {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          model: process.env.GROQ_MODEL || "openai/gpt-oss-20b",
+          model,
           messages: [
             {
               role: "system",

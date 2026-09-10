@@ -7,7 +7,7 @@ const Sidebar = () => {
 
     const [extended,setExtended]=useState(false);
 
-    const {prevPrompts,loadConversation,deleteConversation,clearHistory,newChat,togglePin,theme,toggleTheme} = useContext(Context);
+    const {prevPrompts,loadConversation,deleteConversation,clearHistory,newChat,togglePin,theme,toggleTheme,updateConversationTag} = useContext(Context);
     const [searchTerm, setSearchTerm] = useState('');
     const visiblePrompts = useMemo(() => [...prevPrompts]
         .sort((first, second) => Number(second.pinned) - Number(first.pinned))
@@ -33,6 +33,12 @@ const Sidebar = () => {
                         <div key={item.id} onClick={()=>loadConversation(item)} className="recent-entry">
                             <img src={assets.message_icon} alt="" />
                             <p>{item.title || item.prompt.slice(0,18)}{!item.title && item.prompt.length > 18 ? ' ...' : ''}</p>
+                            <select className="tag-select" value={item.tag || 'General'} onClick={(event) => event.stopPropagation()} onChange={(event) => updateConversationTag(item.id, event.target.value)} aria-label="Conversation tag">
+                                <option>General</option>
+                                <option>Coding</option>
+                                <option>Study</option>
+                                <option>Work</option>
+                            </select>
                             <button className={item.pinned ? 'pin-entry pinned' : 'pin-entry'} onClick={(event) => { event.stopPropagation(); togglePin(item.id); }} aria-label={item.pinned ? 'Unpin conversation' : 'Pin conversation'} title={item.pinned ? 'Unpin' : 'Pin'}>Pin</button>
                             <button
                                 className="delete-entry"
