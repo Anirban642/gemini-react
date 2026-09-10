@@ -1,9 +1,10 @@
 import { useContext, useMemo, useState } from "react";
 import { Archive, ChevronLeft, ChevronRight, FileText, Folder, Moon, Pin, Plus, Search, Settings, Sun, Trash2 } from "lucide-react";
+import PropTypes from "prop-types";
 import "./Sidebar.css";
 import { Context } from "../../Context/Context";
 
-const Sidebar = () => {
+const Sidebar = ({ onHome }) => {
   const [expanded, setExpanded] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const { prevPrompts, loadConversation, deleteConversation, clearHistory, newChat, togglePin, theme, toggleTheme } = useContext(Context);
@@ -15,7 +16,7 @@ const Sidebar = () => {
     <aside className={expanded ? "sidebar expanded" : "sidebar"}>
       <div>
         <div className="brand-row">
-          <div className="brand-mark">N</div>
+          <button className="brand-mark" onClick={onHome} aria-label="Open Nexa home">N</button>
           {expanded ? <div><strong>Nexa</strong><span>AI workspace</span></div> : null}
           <button className="icon-button collapse-button" onClick={() => setExpanded((value) => !value)} aria-label="Toggle sidebar">
             {expanded ? <ChevronLeft size={18} /> : <ChevronRight size={18} />}
@@ -47,6 +48,10 @@ const Sidebar = () => {
       </div>
     </aside>
   );
+};
+
+Sidebar.propTypes = {
+  onHome: PropTypes.func.isRequired,
 };
 
 export default Sidebar;
