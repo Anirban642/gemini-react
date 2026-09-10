@@ -23,6 +23,8 @@ const ContextProvider = (props) => {
     const [activeConversationId, setActiveConversationId] = useState(null);
     const [theme, setTheme] = useState(() => localStorage.getItem("nexa-theme") || "light");
     const [model, setModel] = useState(() => localStorage.getItem("nexa-model") || "openai/gpt-oss-20b");
+    const [mode, setMode] = useState(() => localStorage.getItem("nexa-mode") || "balanced");
+    const [customInstructions, setCustomInstructions] = useState(() => localStorage.getItem("nexa-instructions") || "");
 
     useEffect(() => {
         localStorage.setItem("nexa-history", JSON.stringify(prevPrompts));
@@ -36,6 +38,11 @@ const ContextProvider = (props) => {
     useEffect(() => {
         localStorage.setItem("nexa-model", model);
     }, [model]);
+
+    useEffect(() => {
+        localStorage.setItem("nexa-mode", mode);
+        localStorage.setItem("nexa-instructions", customInstructions);
+    }, [mode, customInstructions]);
 
     const newChat = () => {
         setLoading(false);
@@ -64,7 +71,7 @@ const ContextProvider = (props) => {
         setRecentPrompt(submittedPrompt);
         const response = await run(nextMessages, (chunk) => {
             setResultData((currentResult) => currentResult + chunk);
-        }, model);
+        }, model, mode, customInstructions);
 
         setResultData(response);
         const completedMessages = [
@@ -108,7 +115,7 @@ const ContextProvider = (props) => {
         setResultData("");
         const response = await run(requestMessages, (chunk) => {
             setResultData((currentResult) => currentResult + chunk);
-        }, model);
+        }, model, mode, customInstructions);
         const completedMessages = [
             ...requestMessages,
             { role: "assistant", content: response },
@@ -188,6 +195,10 @@ const ContextProvider = (props) => {
         URL.revokeObjectURL(url);
     };
 
+    const copyResponse = async () => {
+        if (resultData) await navigator.clipboard.writeText(resultData);
+    };
+
 
     const contextValue = {
         prevPrompts,
@@ -211,6 +222,11 @@ const ContextProvider = (props) => {
         exportConversation,
         model,
         setModel,
+        mode,
+        setMode,
+        customInstructions,
+        setCustomInstructions,
+        copyResponse,
         input,
         setInput,
         newChat

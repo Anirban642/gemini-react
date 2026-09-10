@@ -9,7 +9,7 @@ import { Context } from '../../Context/Context';
 
 const Main = () => {
 
-  const {onSent,showResult,loading,resultData,setInput,input,messages,regenerateResponse,editLatestPrompt,model,setModel,exportConversation}=useContext(Context)
+  const {onSent,showResult,loading,resultData,setInput,input,messages,regenerateResponse,editLatestPrompt,model,setModel,exportConversation,mode,setMode,customInstructions,setCustomInstructions,copyResponse}=useContext(Context)
   const [isListening, setIsListening] = useState(false);
   const recognitionRef = useRef(null);
   const suggestions = [
@@ -63,7 +63,14 @@ const Main = () => {
             <option value="openai/gpt-oss-20b">GPT OSS 20B</option>
             <option value="openai/gpt-oss-120b">GPT OSS 120B</option>
           </select>
+          <select value={mode} onChange={(event) => setMode(event.target.value)} aria-label="AI mode">
+            <option value="balanced">Balanced</option>
+            <option value="coding">Coding</option>
+            <option value="study">Study</option>
+            <option value="writing">Writing</option>
+          </select>
           {showResult ? <button onClick={() => exportConversation('md')} title="Export Markdown">Export</button> : null}
+          {showResult ? <button onClick={() => exportConversation('json')} title="Export JSON">JSON</button> : null}
         </div>
         <img src={assets.user_icon} alt="" />
       </div>
@@ -113,13 +120,23 @@ const Main = () => {
                               {message.content}
                             </ReactMarkdown>
                             </div>}
-                          {index === lastAssistantIndex && !loading ? <button className="message-action" onClick={regenerateResponse} title="Generate another response">Regenerate</button> : null}
+                          {index === lastAssistantIndex && !loading ? <div className="response-actions">
+                            <button className="message-action" onClick={regenerateResponse} title="Generate another response">Regenerate</button>
+                            <button className="message-action" onClick={copyResponse} title="Copy latest response">Copy</button>
+                          </div> : null}
                     </div>)}
             </div>
           }
 
         
         <div className="main-bottom">
+          <input
+            className="instructions-input"
+            value={customInstructions}
+            onChange={(event) => setCustomInstructions(event.target.value)}
+            placeholder="Optional response instructions, e.g. keep answers concise"
+            aria-label="Custom response instructions"
+          />
           <div className="search-box">
             <input
               onChange={(e)=>setInput(e.target.value)}

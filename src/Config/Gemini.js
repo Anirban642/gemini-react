@@ -1,10 +1,10 @@
-async function run(messages, onChunk, model) {
+async function run(messages, onChunk, model, mode, instructions) {
   try {
     const apiUrl = import.meta.env.VITE_API_URL || "/api/chat";
     const response = await fetch(apiUrl, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ messages, model }),
+      body: JSON.stringify({ messages, model, mode, instructions }),
     });
 
     if (!response.ok) {

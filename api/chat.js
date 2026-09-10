@@ -38,6 +38,16 @@ export default async function handler(request, response) {
   const model = supportedModels.includes(request.body?.model)
     ? request.body.model
     : process.env.GROQ_MODEL || "openai/gpt-oss-20b";
+  const modes = {
+    balanced: "Be helpful, accurate, and concise.",
+    coding: "Act as a senior software engineer. Explain decisions and provide production-ready code.",
+    study: "Act as a patient tutor. Explain concepts step by step and include a short practice task.",
+    writing: "Act as an editor and writing partner. Improve clarity, structure, tone, and word choice.",
+  };
+  const modeInstruction = modes[request.body?.mode] || modes.balanced;
+  const customInstructions = typeof request.body?.instructions === "string"
+    ? request.body.instructions.trim().slice(0, 1000)
+    : "";
 
   try {
     const groqResponse = await fetch(
@@ -54,7 +64,7 @@ export default async function handler(request, response) {
             {
               role: "system",
               content:
-                "Answer clearly using Markdown. Use short paragraphs, headings when useful, bullet or numbered lists for steps, bold for key terms, and fenced code blocks with the correct language tag for all code. Preserve indentation and explain code outside the code block.",
+                `${modeInstruction} Answer clearly using Markdown. Use short paragraphs, headings when useful, bullet or numbered lists for steps, bold for key terms, and fenced code blocks with the correct language tag for all code. Preserve indentation and explain code outside the code block.${customInstructions ? ` Additional user instructions: ${customInstructions}` : ""}`,
             },
             ...messages,
           ],
