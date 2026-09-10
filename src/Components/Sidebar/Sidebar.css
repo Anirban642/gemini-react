@@ -36,6 +36,13 @@
     animation: fadeIn 1.5s;
 }
 
+.sidebar .recent-heading{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
 .sidebar .recent-title{
     margin-top: 30px;
     margin-bottom: 20px;
@@ -54,6 +61,40 @@
 
 .sidebar .recent-entry:hover{
     background-color: #e2e6eb;
+}
+
+.sidebar .recent-entry p{
+    min-width: 0;
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.sidebar .delete-entry,
+.sidebar .clear-history{
+    border: 0;
+    background: transparent;
+    color: #777;
+    cursor: pointer;
+}
+
+.sidebar .delete-entry{
+    flex: 0 0 auto;
+    padding: 2px 5px;
+    font-size: 16px;
+    line-height: 1;
+    opacity: 0;
+}
+
+.sidebar .recent-entry:hover .delete-entry,
+.sidebar .recent-entry:focus-within .delete-entry{
+    opacity: 1;
+}
+
+.sidebar .delete-entry:hover,
+.sidebar .clear-history:hover{
+    color: #d64545;
 }
 
 .sidebar .bottom{

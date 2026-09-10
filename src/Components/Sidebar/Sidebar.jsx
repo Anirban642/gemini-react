@@ -7,12 +7,7 @@ const Sidebar = () => {
 
     const [extended,setExtended]=useState(false);
 
-    const {onSent,prevPrompts,setRecentPrompt,newChat} = useContext(Context);
-
-    const loadPrompt = async (prompt) => {
-        setRecentPrompt(prompt);
-        await onSent(prompt);
-    }
+    const {prevPrompts,loadConversation,deleteConversation,clearHistory,newChat} = useContext(Context);
 
   return (
     <div className='sidebar'>
@@ -24,12 +19,26 @@ const Sidebar = () => {
             </div>
             {extended
             ? <div className="recent">
-                <p className="recent-title">Recent</p>
-                {prevPrompts?.map((item,index)=>{
+                <div className="recent-heading">
+                    <p className="recent-title">Recent</p>
+                    {prevPrompts.length ? <button onClick={clearHistory} className="clear-history">Clear</button> : null}
+                </div>
+                {prevPrompts?.map((item)=>{
                     return (
-                        <div key={`${item}-${index}`} onClick={()=>loadPrompt(item)} className="recent-entry">
+                        <div key={item.id} onClick={()=>loadConversation(item)} className="recent-entry">
                             <img src={assets.message_icon} alt="" />
-                            <p>{item.slice(0,18)} ...</p>
+                            <p>{item.prompt.slice(0,18)}{item.prompt.length > 18 ? ' ...' : ''}</p>
+                            <button
+                                className="delete-entry"
+                                onClick={(event) => {
+                                    event.stopPropagation();
+                                    deleteConversation(item.id);
+                                }}
+                                aria-label={`Delete ${item.prompt}`}
+                                title="Delete conversation"
+                            >
+                                x
+                            </button>
                         </div>
                     )
                 })}

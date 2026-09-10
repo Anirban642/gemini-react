@@ -39,22 +39,50 @@ export default async function handler(request, response) {
             },
             { role: "user", content: prompt.trim() },
           ],
+          stream: true,
           temperature: 0.7,
           max_tokens: 1024,
         }),
       }
     );
 
-    const data = await groqResponse.json();
     if (!groqResponse.ok) {
+      const data = await groqResponse.json();
       return response.status(groqResponse.status).json({
         error: data.error?.message || "The AI request failed",
       });
     }
 
-    return response.status(200).json({
-      content: data.choices?.[0]?.message?.content || "No response was returned",
-    });
+    response.statusCode = 200;
+    response.setHeader("Content-Type", "text/event-stream");
+    response.setHeader("Cache-Control", "no-cache, no-transform");
+    response.setHeader("Connection", "keep-alive");
+    response.flushHeaders?.();
+
+    const reader = groqResponse.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = "";
+
+    while (true) {
+      const { done, value } = await reader.read();
+      buffer += decoder.decode(value || new Uint8Array(), { stream: !done });
+      const lines = buffer.split("\n");
+      buffer = lines.pop() || "";
+
+      for (const line of lines) {
+        if (!line.startsWith("data: ")) continue;
+        const payload = line.slice(6).trim();
+        if (payload === "[DONE]") continue;
+
+        const chunk = JSON.parse(payload).choices?.[0]?.delta?.content;
+        if (chunk) response.write(`data: ${JSON.stringify({ content: chunk })}\n\n`);
+      }
+
+      if (done) break;
+    }
+
+    response.write("data: {\"done\":true}\n\n");
+    return response.end();
   } catch (error) {
     console.error(error);
     return response.status(500).json({ error: "The AI request failed" });

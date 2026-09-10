@@ -1,4 +1,4 @@
-import { createContext, useState } from "react";
+import { createContext, useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import run from "../Config/Gemini";
 
@@ -8,14 +8,27 @@ const ContextProvider = (props) => {
 
     const [input,setInput]=useState("");
     const [recentPrompt, setRecentPrompt] = useState("");
-    const [prevPrompts, setPrevPrompts] = useState([]);
+    const [prevPrompts, setPrevPrompts] = useState(() => {
+        try {
+            const savedHistory = JSON.parse(localStorage.getItem("nexa-history"));
+            return Array.isArray(savedHistory) ? savedHistory : [];
+        } catch {
+            return [];
+        }
+    });
     const [showResult, setShowResult] = useState(false);
     const [loading, setLoading] = useState(false);
     const [resultData, setResultData] = useState("");
 
+    useEffect(() => {
+        localStorage.setItem("nexa-history", JSON.stringify(prevPrompts));
+    }, [prevPrompts]);
+
     const newChat = () => {
         setLoading(false);
         setShowResult(false);
+        setRecentPrompt("");
+        setResultData("");
     }
 
     const onSent = async (prompt) => {
@@ -26,19 +39,43 @@ const ContextProvider = (props) => {
         setLoading(true);
         setShowResult(true);
         let response;
-        if (prompt !== undefined) {
-            response = await run(submittedPrompt);
-            setRecentPrompt(submittedPrompt);
-        } else {
-            setPrevPrompts(prev=>[...prev,submittedPrompt]);
-            setRecentPrompt(submittedPrompt);
-            response = await run(submittedPrompt);
-        }
+        setRecentPrompt(submittedPrompt);
+        response = await run(submittedPrompt, (chunk) => {
+            setResultData((currentResult) => currentResult + chunk);
+        });
 
         setResultData(response);
+        setPrevPrompts((prev) => [
+            {
+                id: crypto.randomUUID(),
+                prompt: submittedPrompt,
+                response,
+                createdAt: new Date().toISOString(),
+            },
+            ...prev.filter((item) => item.prompt !== submittedPrompt),
+        ]);
         setLoading(false);
         setInput("");
     }
+
+    const loadConversation = (conversation) => {
+        setRecentPrompt(conversation.prompt);
+        setResultData(conversation.response);
+        setShowResult(true);
+        setLoading(false);
+        setInput("");
+    };
+
+    const deleteConversation = (conversationId) => {
+        const conversation = prevPrompts.find((item) => item.id === conversationId);
+        setPrevPrompts((prev) => prev.filter((item) => item.id !== conversationId));
+        if (conversation?.prompt === recentPrompt) newChat();
+    };
+
+    const clearHistory = () => {
+        setPrevPrompts([]);
+        newChat();
+    };
 
 
     const contextValue = {
@@ -50,6 +87,9 @@ const ContextProvider = (props) => {
         showResult,
         loading,
         resultData,
+        loadConversation,
+        deleteConversation,
+        clearHistory,
         input,
         setInput,
         newChat

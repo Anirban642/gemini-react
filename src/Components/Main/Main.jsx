@@ -87,7 +87,7 @@ const Main = () => {
                 </div>
                 <div className="result-data">
                   <img src={assets.gemini_icon} alt="Nexa AI" />
-                  {loading
+                  {loading && !resultData
                   ?<div className="loader">
                       <hr />
                       <hr />
