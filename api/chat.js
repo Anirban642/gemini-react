@@ -11,9 +11,23 @@ export default async function handler(request, response) {
     return response.status(405).json({ error: "Method not allowed" });
   }
 
-  const prompt = request.body?.prompt;
-  if (typeof prompt !== "string" || !prompt.trim()) {
-    return response.status(400).json({ error: "A prompt is required" });
+  const requestMessages = request.body?.messages;
+  const messages = Array.isArray(requestMessages)
+    ? requestMessages
+    : typeof request.body?.prompt === "string"
+      ? [{ role: "user", content: request.body.prompt.trim() }]
+      : [];
+
+  if (
+    !messages.length ||
+    messages.some(
+      (message) =>
+        !["user", "assistant"].includes(message.role) ||
+        typeof message.content !== "string" ||
+        !message.content.trim()
+    )
+  ) {
+    return response.status(400).json({ error: "A valid message list is required" });
   }
 
   if (!process.env.GROQ_API) {
@@ -37,7 +51,7 @@ export default async function handler(request, response) {
               content:
                 "Answer clearly using Markdown. Use short paragraphs, headings when useful, bullet or numbered lists for steps, bold for key terms, and fenced code blocks with the correct language tag for all code. Preserve indentation and explain code outside the code block.",
             },
-            { role: "user", content: prompt.trim() },
+            ...messages,
           ],
           stream: true,
           temperature: 0.7,

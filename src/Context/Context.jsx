@@ -19,6 +19,8 @@ const ContextProvider = (props) => {
     const [showResult, setShowResult] = useState(false);
     const [loading, setLoading] = useState(false);
     const [resultData, setResultData] = useState("");
+    const [messages, setMessages] = useState([]);
+    const [activeConversationId, setActiveConversationId] = useState(null);
 
     useEffect(() => {
         localStorage.setItem("nexa-history", JSON.stringify(prevPrompts));
@@ -29,6 +31,8 @@ const ContextProvider = (props) => {
         setShowResult(false);
         setRecentPrompt("");
         setResultData("");
+        setMessages([]);
+        setActiveConversationId(null);
     }
 
     const onSent = async (prompt) => {
@@ -38,29 +42,55 @@ const ContextProvider = (props) => {
         setResultData("");
         setLoading(true);
         setShowResult(true);
-        let response;
+        const conversationId = activeConversationId || crypto.randomUUID();
+        const nextMessages = [
+            ...messages,
+            { role: "user", content: submittedPrompt },
+        ];
+
+        setActiveConversationId(conversationId);
+        setMessages(nextMessages);
         setRecentPrompt(submittedPrompt);
-        response = await run(submittedPrompt, (chunk) => {
+        const response = await run(nextMessages, (chunk) => {
             setResultData((currentResult) => currentResult + chunk);
         });
 
         setResultData(response);
-        setPrevPrompts((prev) => [
-            {
-                id: crypto.randomUUID(),
-                prompt: submittedPrompt,
+        const completedMessages = [
+            ...nextMessages,
+            { role: "assistant", content: response },
+        ];
+        setMessages(completedMessages);
+        setPrevPrompts((prev) => {
+            const existingConversation = prev.find((item) => item.id === conversationId);
+            const conversation = {
+                id: conversationId,
+                prompt: existingConversation?.prompt || submittedPrompt,
                 response,
-                createdAt: new Date().toISOString(),
-            },
-            ...prev.filter((item) => item.prompt !== submittedPrompt),
-        ]);
+                messages: completedMessages,
+                createdAt: existingConversation?.createdAt || new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+            };
+
+            return existingConversation
+                ? prev.map((item) => item.id === conversationId ? conversation : item)
+                : [conversation, ...prev];
+        });
         setLoading(false);
         setInput("");
     }
 
     const loadConversation = (conversation) => {
-        setRecentPrompt(conversation.prompt);
-        setResultData(conversation.response);
+        const conversationMessages = conversation.messages || [
+            { role: "user", content: conversation.prompt },
+            { role: "assistant", content: conversation.response },
+        ];
+        const lastUserMessage = [...conversationMessages].reverse().find((item) => item.role === "user");
+        const lastAssistantMessage = [...conversationMessages].reverse().find((item) => item.role === "assistant");
+        setActiveConversationId(conversation.id);
+        setMessages(conversationMessages);
+        setRecentPrompt(lastUserMessage?.content || conversation.prompt);
+        setResultData(lastAssistantMessage?.content || conversation.response);
         setShowResult(true);
         setLoading(false);
         setInput("");
@@ -87,6 +117,7 @@ const ContextProvider = (props) => {
         showResult,
         loading,
         resultData,
+        messages,
         loadConversation,
         deleteConversation,
         clearHistory,

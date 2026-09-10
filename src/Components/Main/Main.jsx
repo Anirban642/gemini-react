@@ -9,7 +9,7 @@ import { Context } from '../../Context/Context';
 
 const Main = () => {
 
-  const {onSent,recentPrompt,showResult,loading,resultData,setInput,input}=useContext(Context)
+  const {onSent,showResult,loading,resultData,setInput,input,messages}=useContext(Context)
   const [isListening, setIsListening] = useState(false);
   const recognitionRef = useRef(null);
   const suggestions = [
@@ -20,6 +20,10 @@ const Main = () => {
   ]
 
   useEffect(() => () => recognitionRef.current?.stop(), []);
+
+  const visibleMessages = loading
+    ? [...messages, { role: 'assistant', content: resultData }]
+    : messages;
 
   const toggleVoiceTyping = () => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -81,25 +85,25 @@ const Main = () => {
         </div>
             </>
             : <div className="result">
-                <div className="result-title">
-                  <img src={assets.user_icon} alt="User" />
-                  <p>{recentPrompt}</p>
-                </div>
-                <div className="result-data">
-                  <img src={assets.gemini_icon} alt="Nexa AI" />
-                  {loading && !resultData
-                  ?<div className="loader">
-                      <hr />
-                      <hr />
-                      <hr />
-                  </div>
-                  :<div className="markdown-content">
-                    <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeHighlight]}>
-                      {resultData}
-                    </ReactMarkdown>
-                  </div>
-                } 
-                </div>
+                {visibleMessages.map((message, index) => message.role === 'user'
+                  ? <div className="result-title" key={`${message.role}-${index}`}>
+                      <img src={assets.user_icon} alt="User" />
+                      <p>{message.content}</p>
+                    </div>
+                  : <div className="result-data" key={`${message.role}-${index}`}>
+                      <img src={assets.gemini_icon} alt="Nexa AI" />
+                      {loading && index === visibleMessages.length - 1 && !message.content
+                        ? <div className="loader">
+                            <hr />
+                            <hr />
+                            <hr />
+                          </div>
+                        : <div className="markdown-content">
+                            <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeHighlight]}>
+                              {message.content}
+                            </ReactMarkdown>
+                          </div>}
+                    </div>)}
             </div>
           }
 
