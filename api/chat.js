@@ -31,7 +31,14 @@ export default async function handler(request, response) {
         },
         body: JSON.stringify({
           model: process.env.GROQ_MODEL || "openai/gpt-oss-20b",
-          messages: [{ role: "user", content: prompt.trim() }],
+          messages: [
+            {
+              role: "system",
+              content:
+                "Answer clearly using Markdown. Use short paragraphs, headings when useful, bullet or numbered lists for steps, bold for key terms, and fenced code blocks with the correct language tag for all code. Preserve indentation and explain code outside the code block.",
+            },
+            { role: "user", content: prompt.trim() },
+          ],
           temperature: 0.7,
           max_tokens: 1024,
         }),

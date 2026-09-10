@@ -1,4 +1,8 @@
-import { useContext } from 'react';
+import { useEffect, useRef, useState, useContext } from 'react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import rehypeHighlight from 'rehype-highlight';
+import 'highlight.js/styles/github.css';
 import './Main.css';
 import {assets} from '../../assets/assets'
 import { Context } from '../../Context/Context';
@@ -6,12 +10,43 @@ import { Context } from '../../Context/Context';
 const Main = () => {
 
   const {onSent,recentPrompt,showResult,loading,resultData,setInput,input}=useContext(Context)
+  const [isListening, setIsListening] = useState(false);
+  const recognitionRef = useRef(null);
   const suggestions = [
     ['Suggest some place for an upcoming trip of 4 members', assets.compass_icon],
     ['Help me to pass my examination with a 80% marks', assets.bulb_icon],
     ['Elon musk success stories in a single paragraph', assets.message_icon],
     ['Can you help me to improve my code ?', assets.code_icon],
   ]
+
+  useEffect(() => () => recognitionRef.current?.stop(), []);
+
+  const toggleVoiceTyping = () => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      window.alert('Voice typing is not supported in this browser. Try Chrome or Edge.');
+      return;
+    }
+
+    if (isListening) {
+      recognitionRef.current?.stop();
+      return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.lang = navigator.language || 'en-US';
+    recognition.continuous = false;
+    recognition.interimResults = false;
+    recognition.onstart = () => setIsListening(true);
+    recognition.onresult = (event) => {
+      const transcript = event.results[0][0].transcript;
+      setInput((currentInput) => `${currentInput}${currentInput ? ' ' : ''}${transcript}`);
+    };
+    recognition.onerror = () => setIsListening(false);
+    recognition.onend = () => setIsListening(false);
+    recognitionRef.current = recognition;
+    recognition.start();
+  };
 
   return (
     <div className='main'>
@@ -58,7 +93,11 @@ const Main = () => {
                       <hr />
                       <hr />
                   </div>
-                  :<p dangerouslySetInnerHTML={{__html:resultData}}></p>
+                  :<div className="markdown-content">
+                    <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeHighlight]}>
+                      {resultData}
+                    </ReactMarkdown>
+                  </div>
                 } 
                 </div>
             </div>
@@ -78,8 +117,13 @@ const Main = () => {
               aria-label="Prompt"
             />
             <div>
-              <img src={assets.gallery_icon} alt="" />
-              <img src={assets.mic_icon} alt="" />
+              <img
+                className={isListening ? 'voice-button listening' : 'voice-button'}
+                onClick={toggleVoiceTyping}
+                src={assets.mic_icon}
+                alt={isListening ? 'Stop voice typing' : 'Start voice typing'}
+                title={isListening ? 'Stop voice typing' : 'Start voice typing'}
+              />
               {input.trim() ? <img onClick={()=>onSent()} src={assets.send_icon} alt="Send prompt" /> : null}
             </div>
           </div>
